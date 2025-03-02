@@ -1,8 +1,5 @@
 local M = {}
 
-
-function M.setup() 
-end
 M.namespace = vim.api.nvim_create_namespace("witt")
 
 local function find_annotations()
@@ -80,25 +77,27 @@ function M.clear()
 	vim.diagnostic.reset(M.namespace, vim.api.nvim_get_current_buf())
 end
 
-vim.api.nvim_create_user_command(
-	"Witt",
-	M.update_diagnostics,
-	{ desc = "Get TypeScript type above the // ^? annotation" }
-)
-vim.api.nvim_create_user_command("WittClear", M.clear, { desc = "Remove the Witt Annotations" })
+function M.setup()
+	vim.api.nvim_create_user_command(
+		"Witt",
+		M.update_diagnostics,
+		{ desc = "Get TypeScript type above the // ^? annotation" }
+	)
+	vim.api.nvim_create_user_command("WittClear", M.clear, { desc = "Remove the Witt Annotations" })
 
-vim.api.nvim_create_autocmd({ "TextChanged", "InsertLeave" }, {
-	pattern = "*.ts,*.tsx,*.mts",
-	callback = M.update_diagnostics,
-})
+	vim.api.nvim_create_autocmd({ "TextChanged", "InsertLeave" }, {
+		pattern = "*.ts,*.tsx,*.mts",
+		callback = M.update_diagnostics,
+	})
 
-vim.api.nvim_create_autocmd("LspAttach", {
-	callback = function(args)
-		local client = vim.lsp.get_client_by_id(args.data.client_id)
-		if client and client.name == "tsserver" then
-			M.update_diagnostics()
-		end
-	end,
-})
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			local client = vim.lsp.get_client_by_id(args.data.client_id)
+			if client and client.name == "tsserver" then
+				M.update_diagnostics()
+			end
+		end,
+	})
+end
 
 return M
